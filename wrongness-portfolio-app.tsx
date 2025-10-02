@@ -264,7 +264,7 @@ const WrongnessPortfolioApp = () => {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {activeTab === 'dashboard' && <DashboardTab stats={stats} miningQueue={miningQueue} protocols={protocols} />}
         {activeTab === 'artifacts' && <ArtifactsTab artifacts={artifacts} />}
-        {activeTab === 'datasets' && <DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} onOpenAddDatasetModal={() => setIsNewDatasetModalOpen(true)} />}
+        {activeTab === 'datasets' && <DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} onOpenAddDatasetModal={() => setIsNewDatasetModalOpen(true)} onAddDataset={handleAddDataset} />}
         {activeTab === 'protocols' && <ProtocolsTab protocols={protocols} />}
         {activeTab === 'mining' && <MiningTab />}
       </main>

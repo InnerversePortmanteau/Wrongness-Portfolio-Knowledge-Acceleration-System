@@ -222,8 +222,8 @@ Every documented error becomes a permanent system upgrade. After 10, 50, 100 art
 
 ### Phase 2: Enhancement (Next 3 months)
 
-- [ ] Full-text search across artifacts
-- [ ] Pattern tagging and categorization
+- [x] Full-text search across artifacts
+- [x] Pattern tagging and categorization
 - [ ] Export to PDF/Markdown
 - [x] Local storage persistence
 - [ ] Dataset import tools (URL → extraction)
