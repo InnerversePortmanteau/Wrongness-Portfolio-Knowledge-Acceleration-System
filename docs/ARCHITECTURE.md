@@ -39,3 +39,8 @@ src/
 - **Global State Management**: If the application grows in complexity and prop drilling becomes cumbersome (e.g., passing props through 3+ levels), we will evaluate introducing a lightweight global state manager like Zustand or React's Context API with reducers.
 - **Routing**: For features like a dedicated "Artifact Details" page, we will introduce a client-side router like React Router.
 - **Data Analysis Module**: To support the "Data-Driven PKM" concept, a future module may be added to handle the import, parsing, and mapping of external datasets. This would likely live in a new `src/services` or `src/lib` directory to keep it separate from the core UI.
+
+## 4. Environment & Configuration
+
+- **Environment Variables**: The project uses Vite's environment variable handling. All configuration variables intended for client-side use must be prefixed with `VITE_`.
+- **Secrets Management**: A `.env.example` file is provided as a template. Developers must create a local `.env` file for their configuration. The `.gitignore` file prevents any `.env` files from being committed to the repository, ensuring that secrets are not exposed.

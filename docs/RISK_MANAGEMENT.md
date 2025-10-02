@@ -14,6 +14,8 @@ _These are things we know we know. They are documented facts about the project._
 - Data is stored in `localStorage`, which is not secure or shareable.
 - The current state management relies on prop drilling.
 - The project has a clear roadmap outlined in `README.md`.
+- The test environment relies on Node.js's experimental "VM Modules" feature, which could change in future Node.js versions.
+- Our version of `react-router-dom` (v6) has upcoming breaking changes in v7, as indicated by test warnings.
 
 ### 2. Known Unknowns (Questions)
 
@@ -23,6 +25,8 @@ _These are things we know we don't know. They are questions we need to answer._
 - **User Adoption**: Will the "cost" of documenting errors feel too high for users, leading to abandonment?
 - **Data Import Complexity**: How difficult will it be to parse various external dataset formats (e.g., PDF, unstructured web pages)?
 - **Metric Accuracy**: Are the current ROI and time-saved calculations truly representative of value, or do they need refinement?
+- **Tooling Stability**: When will "VM Modules" become stable in Node.js, and what changes will be required in our test script when that happens?
+- **Dependency Migration**: What is the scope of work required to migrate to React Router v7 and adopt its new features (e.g., `v7_startTransition`)?
 
 ### 3. Unknown Knowns (Untapped Knowledge)
 

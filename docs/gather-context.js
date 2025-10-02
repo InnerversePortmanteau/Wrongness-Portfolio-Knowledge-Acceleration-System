@@ -4,9 +4,11 @@ const path = require("path");
 // List of all documentation files that serve as our project's "memory"
 const contextFiles = [
   "README.md",
+  "CONTRIBUTING.md",
   "docs/ARCHITECTURE.md",
   "docs/DECISION_LOG.md",
   "docs/DEVELOPMENT_LOG.md",
+  "docs/LIFECYCLE.md",
   "docs/RASCI_MATRIX.md",
   "docs/RISK_MANAGEMENT.md",
   "docs/USER_JOURNEYS.md",

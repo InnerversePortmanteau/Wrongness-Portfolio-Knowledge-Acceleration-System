@@ -31,7 +31,7 @@ Each "artifact" documents a complete wrongness → learning cycle:
 - **The Context**: Initial state and problem
 - **The Wrongness**: Flawed mental model or assumptions
 - **The Signal**: Data that revealed the flaw
-- **The Rebuild**: Corrected model and protocols
+- **The Rebuild**: Corrected model, extracted protocols, and a root cause analysis (using frameworks like the Fishbone Diagram) to identify systemic issues.
 - **The Result**: Measurable improvement
 
 ### 2. Protocol Library

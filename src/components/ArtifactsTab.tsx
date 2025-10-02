@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { CheckCircle, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Artifact } from '../types';
 
 interface ArtifactsTabProps {
@@ -101,9 +102,9 @@ const ArtifactsTab: React.FC<ArtifactsTabProps> = ({ artifacts }) => {
               </div>
 
               <div className="flex items-center space-x-2">
-                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm">
+                <Link to={`/artifacts/${artifact.id}`} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm">
                   View Details
-                </button>
+                </Link>
                 <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm">
                   Export
                 </button>
