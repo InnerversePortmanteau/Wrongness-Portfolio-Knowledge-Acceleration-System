@@ -20,12 +20,14 @@ The Wrongness Portfolio is a structured framework for documenting, analyzing, an
 - Not a bug tracker (use Jira, GitHub Issues, etc. for that)
 - Not a journal or diary (though it may feel therapeutic)
 - Not a blame system (it's explicitly about learning, not accountability)
-- Not a replacement for documentation (it's a complement that captures the *why* behind decisions)
+- Not a replacement for documentation (it's a complement that captures the _why_ behind decisions)
 
 ## Key Features
 
 ### 1. Artifact System
+
 Each "artifact" documents a complete wrongness → learning cycle:
+
 - **The Context**: Initial state and problem
 - **The Wrongness**: Flawed mental model or assumptions
 - **The Signal**: Data that revealed the flaw
@@ -33,14 +35,18 @@ Each "artifact" documents a complete wrongness → learning cycle:
 - **The Result**: Measurable improvement
 
 ### 2. Protocol Library
+
 Extracted, reusable procedures that can be applied across similar problems:
+
 - Success rate tracking
 - Time-saved metrics
 - Confidence intervals (high/medium/low)
 - Application contexts and boundary conditions
 
 ### 3. Dataset Mining System
+
 Accelerate learning by systematically extracting patterns from:
+
 - Postmortem databases (Google SRE, GitLab, Stripe)
 - Stack Overflow high-vote questions
 - GitHub issue archaeology
@@ -49,7 +55,9 @@ Accelerate learning by systematically extracting patterns from:
 Includes prioritization scoring: `(Relevance × 3) + (Signal Density × 2) + (Transferability × 2)`
 
 ### 4. ROI Tracking
+
 Measure the return on knowledge investment:
+
 ```
 Dataset ROI = (Validated Protocols × Avg Time Saved) / Time Invested
 Protocol Value = Times Applied × Avg Time Saved
@@ -83,6 +91,7 @@ wrongness-portfolio/
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ and npm/yarn
 - A willingness to document your mistakes
 - Intellectual humility (the foundation of learning)
@@ -125,22 +134,26 @@ npm run dev
 ## Usage Patterns
 
 ### Daily Practice (15 minutes)
+
 - Log any debugging session that took >30 minutes
 - Review one existing protocol and look for improvement opportunities
 - Check dashboard for protocol success rates
 
 ### Weekly Review (30 minutes)
+
 - Mine 5 patterns from your highest-priority dataset
 - Create or update one artifact
 - Review weekly mining goals and adjust
 
 ### Monthly Synthesis (2 hours)
+
 - Look for meta-patterns across artifacts
 - Update confidence levels based on validation data
 - Calculate ROI on datasets and double down on high performers
 - Archive or sunset protocols that no longer apply
 
 ### Quarterly Deep Dive (4 hours)
+
 - Create a "meta-artifact" identifying recurring themes
 - Build new protocol categories
 - Evaluate which wrongnesses you've stopped making (success!)
@@ -158,23 +171,29 @@ npm run dev
 ## Philosophy & Principles
 
 ### 1. Wrongness as Data
+
 Frustration is a signal, not noise. Extended debugging time indicates your mental model is broken at a level above the code.
 
 ### 2. System-First Thinking
+
 Most "code bugs" are actually system integrity issues (environment, dependencies, configuration). Always verify the ground truth before changing code.
 
 ### 3. High-Fidelity Data
+
 Generic error messages hide specific problems. Your first goal in any investigation is to improve the quality of information the system gives you.
 
 ### 4. Strategic Retreat
+
 When a feature fights you, retreat to a known-good state. Prioritize a functional process over a broken outcome.
 
 ### 5. Knowledge Compounds
+
 Every documented error becomes a permanent system upgrade. After 10, 50, 100 artifacts, you have a queryable library of hard-won wisdom.
 
 ## Example Artifacts
 
 ### WP-001: I Was Wrong About Debugging
+
 **Domain**: Software Engineering  
 **Problem**: ImportError despite package being installed  
 **Wrong Model**: "The error message points to the problem's source"  
@@ -184,6 +203,7 @@ Every documented error becomes a permanent system upgrade. After 10, 50, 100 art
 **Status**: Evergreen
 
 ### WP-002: I Was Wrong About Communication (Example)
+
 **Domain**: Team Collaboration  
 **Problem**: Feature requirements kept changing  
 **Wrong Model**: "Stakeholders don't know what they want"  
@@ -194,19 +214,22 @@ Every documented error becomes a permanent system upgrade. After 10, 50, 100 art
 ## Roadmap
 
 ### Phase 1: Foundation (Current)
+
 - [x] Core artifact structure
 - [x] Protocol library
 - [x] Dataset prioritization system
 - [x] Basic metrics tracking
 
 ### Phase 2: Enhancement (Next 3 months)
+
 - [ ] Full-text search across artifacts
 - [ ] Pattern tagging and categorization
 - [ ] Export to PDF/Markdown
-- [ ] Local storage persistence
+- [x] Local storage persistence
 - [ ] Dataset import tools (URL → extraction)
 
 ### Phase 3: Intelligence (6+ months)
+
 - [ ] Graph visualization of protocol relationships
 - [ ] Pattern recognition across artifacts
 - [ ] AI-assisted categorization
@@ -230,6 +253,7 @@ MIT License - Use this framework however helps you learn faster.
 ## Acknowledgments
 
 Inspired by:
+
 - **James Reason**: Swiss Cheese Model of accident analysis
 - **Daniel Kahneman**: Thinking, Fast and Slow
 - **Donella Meadows**: Thinking in Systems
@@ -247,4 +271,4 @@ Open an issue or reach out directly.
 
 **Remember**: The goal isn't to never be wrong. The goal is to be wrong about different things each time, and to document the journey so you never make the same mistake twice.
 
-*"The value of an insight is multiplied by its documentation."*
+_"The value of an insight is multiplied by its documentation."_

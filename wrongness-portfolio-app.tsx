@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, BookOpen, Zap } from 'lucide-react';
+import usePersistentState from './src/hooks/usePersistentState';
 import { Artifact, Dataset, MiningTask, Protocol } from './src/types';
 
 import DashboardTab from './src/components/DashboardTab';
@@ -10,7 +11,7 @@ import MiningTab from './src/components/MiningTab';
 
 const WrongnessPortfolioApp = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [artifacts, setArtifacts] = useState<Artifact[]>([
+  const [artifacts, setArtifacts] = usePersistentState<Artifact[]>('artifacts', [
     {
       id: 'WP-001',
       title: 'I Was Wrong About Debugging',
@@ -26,7 +27,7 @@ const WrongnessPortfolioApp = () => {
     }
   ]);
   
-  const [datasets, setDatasets] = useState<Dataset[]>([
+  const [datasets, setDatasets] = usePersistentState<Dataset[]>('datasets', [
     {
       id: 'DS-001',
       name: 'Google SRE Postmortems',
@@ -68,7 +69,7 @@ const WrongnessPortfolioApp = () => {
     }
   ]);
 
-  const [miningQueue, setMiningQueue] = useState<MiningTask[]>([
+  const [miningQueue, setMiningQueue] = usePersistentState<MiningTask[]>('miningQueue', [
     {
       id: 'MQ-001',
       source: 'Google SRE Postmortems',
@@ -89,7 +90,7 @@ const WrongnessPortfolioApp = () => {
     }
   ]);
 
-  const [protocols, setProtocols] = useState<Protocol[]>([
+  const [protocols, setProtocols] = usePersistentState<Protocol[]>('protocols', [
     {
       id: 'P-001',
       name: 'Triage the System First',
