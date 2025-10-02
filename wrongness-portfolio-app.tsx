@@ -8,9 +8,16 @@ import ArtifactsTab from './src/components/ArtifactsTab';
 import DatasetsTab from './src/components/DatasetsTab';
 import ProtocolsTab from './src/components/ProtocolsTab';
 import MiningTab from './src/components/MiningTab';
+import NewArtifactModal from './src/components/NewArtifactModal';
+import NewDatasetModal, { NewDatasetData } from './src/components/NewDatasetModal';
+import LogProtocolUseModal, { LogData } from './src/components/LogProtocolUseModal';
 
 const WrongnessPortfolioApp = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isNewArtifactModalOpen, setIsNewArtifactModalOpen] = useState(false);
+  const [isNewDatasetModalOpen, setIsNewDatasetModalOpen] = useState(false);
+  const [isLogProtocolModalOpen, setIsLogProtocolModalOpen] = useState(false);
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
   const [artifacts, setArtifacts] = usePersistentState<Artifact[]>('artifacts', [
     {
       id: 'WP-001',
@@ -123,6 +130,69 @@ const WrongnessPortfolioApp = () => {
     }
   ]);
 
+  const handleAddArtifact = (newArtifactData: Omit<Artifact, 'id' | 'dateCreated' | 'protocols' | 'timesSaved' | 'avgTimeSaved' | 'validated' | 'confidence' | 'status'>) => {
+    const newIdNumber = artifacts.length > 0 ? Math.max(...artifacts.map(a => parseInt(a.id.split('-')[1]))) + 1 : 1;
+    const newArtifact: Artifact = {
+      ...newArtifactData,
+      id: `WP-${String(newIdNumber).padStart(3, '0')}`,
+      status: 'active',
+      confidence: {},
+      dateCreated: new Date().toISOString().split('T')[0],
+      protocols: 0,
+      timesSaved: 0,
+      avgTimeSaved: 0,
+      validated: false,
+    };
+
+    setArtifacts(prevArtifacts => [...prevArtifacts, newArtifact]);
+  };
+
+  const handleAddDataset = (newDatasetData: NewDatasetData) => {
+    const newIdNumber = datasets.length > 0 ? Math.max(...datasets.map(d => parseInt(d.id.split('-')[1]))) + 1 : 1;
+    const newDataset: Dataset = {
+      ...newDatasetData,
+      id: `DS-${String(newIdNumber).padStart(3, '0')}`,
+      status: 'planned',
+      timeInvested: 0,
+      protocolsExtracted: 0,
+      protocolsValidated: 0,
+    };
+
+    setDatasets(prevDatasets => [...prevDatasets, newDataset]);
+  };
+
+  const handleLogProtocolUse = (logData: LogData) => {
+    setProtocols(prevProtocols =>
+      prevProtocols.map(p => {
+        if (p.id === logData.protocolId) {
+          const totalApplications = p.timesApplied + 1;
+          
+          // Calculate new success rate
+          const currentSuccessfulApplications = p.timesApplied * (p.successRate / 100);
+          const newSuccessfulApplications = currentSuccessfulApplications + (logData.wasSuccess ? 1 : 0);
+          const newSuccessRate = Math.round((newSuccessfulApplications / totalApplications) * 100);
+
+          // Calculate new average time saved
+          const totalTimeSavedSoFar = p.avgTimeSaved * p.timesApplied;
+          const newTotalTimeSaved = totalTimeSavedSoFar + logData.timeSaved;
+          const newAvgTimeSaved = Math.round(newTotalTimeSaved / totalApplications);
+
+          return {
+            ...p,
+            timesApplied: totalApplications,
+            successRate: newSuccessRate,
+            avgTimeSaved: newAvgTimeSaved,
+          };
+        }
+        return p;
+      })
+    );
+  };
+
+  const openNewArtifactModal = () => {
+    setIsNewArtifactModalOpen(true); setIsFabMenuOpen(false);
+  };
+
   const calculateDatasetROI = (dataset: Dataset) => {
     if (dataset.timeInvested === 0) return 0;
     const roi = (dataset.protocolsValidated * 30) / (dataset.timeInvested * 60);
@@ -161,7 +231,7 @@ const WrongnessPortfolioApp = () => {
                 <p className="text-sm text-gray-500">Knowledge Acceleration System</p>
               </div>
             </div>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+            <button onClick={openNewArtifactModal} className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
               <Plus className="w-4 h-4" />
               <span>New Artifact</span>
             </button>
@@ -194,23 +264,50 @@ const WrongnessPortfolioApp = () => {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {activeTab === 'dashboard' && <DashboardTab stats={stats} miningQueue={miningQueue} protocols={protocols} />}
         {activeTab === 'artifacts' && <ArtifactsTab artifacts={artifacts} />}
-        {activeTab === 'datasets' && <DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} />}
+        {activeTab === 'datasets' && <DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} onOpenAddDatasetModal={() => setIsNewDatasetModalOpen(true)} />}
         {activeTab === 'protocols' && <ProtocolsTab protocols={protocols} />}
         {activeTab === 'mining' && <MiningTab />}
       </main>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 flex flex-col space-y-3">
-        <button className="w-14 h-14 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 transition flex items-center justify-center">
-          <Zap className="w-6 h-6" />
+      <div className="fixed bottom-6 right-6">
+        {isFabMenuOpen && (
+          <div className="absolute bottom-full right-0 mb-3 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm animate-fade-in-up">
+            <div className="font-medium text-gray-900 mb-2 px-2">Quick Actions</div>
+            <button onClick={() => { setIsLogProtocolModalOpen(true); setIsFabMenuOpen(false); }} className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
+              <span>Log Protocol Use</span>
+            </button>
+            <button className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
+              <span>Start Mining</span>
+            </button>
+            <button onClick={() => { openNewArtifactModal(); setIsFabMenuOpen(false); }} className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
+              <span>New Artifact</span>
+            </button>
+          </div>
+        )}
+        <button onClick={() => setIsFabMenuOpen(prev => !prev)} className="w-14 h-14 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition-transform transform hover:scale-105 flex items-center justify-center">
+          <Zap className={`w-6 h-6 transition-transform duration-300 ${isFabMenuOpen ? 'rotate-45' : ''}`} />
         </button>
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs">
-          <div className="font-medium text-gray-900 mb-1">Quick Actions</div>
-          <button className="w-full text-left px-2 py-1 hover:bg-gray-50 rounded text-gray-700">Log Protocol Use</button>
-          <button className="w-full text-left px-2 py-1 hover:bg-gray-50 rounded text-gray-700">Start Mining</button>
-          <button className="w-full text-left px-2 py-1 hover:bg-gray-50 rounded text-gray-700">New Artifact</button>
-        </div>
       </div>
+
+      <NewArtifactModal
+        isOpen={isNewArtifactModalOpen}
+        onClose={() => setIsNewArtifactModalOpen(false)}
+        onSave={handleAddArtifact}
+      />
+
+      <NewDatasetModal
+        isOpen={isNewDatasetModalOpen}
+        onClose={() => setIsNewDatasetModalOpen(false)}
+        onSave={handleAddDataset}
+      />
+
+      <LogProtocolUseModal
+        isOpen={isLogProtocolModalOpen}
+        onClose={() => setIsLogProtocolModalOpen(false)}
+        onSave={handleLogProtocolUse}
+        protocols={protocols}
+      />
     </div>
   );
 };

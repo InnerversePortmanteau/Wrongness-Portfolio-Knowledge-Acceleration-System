@@ -113,7 +113,7 @@ npm run dev
 ### Your First Artifact
 
 1. **Identify a recent frustrating debugging session** (the more frustrating, the better the data)
-2. Navigate to **Artifacts** → **New Artifact**
+2. Click the **New Artifact** button in the header or in the floating action menu.
 3. Fill in the template:
    - What was your initial approach? (The Wrong Model)
    - What data indicated it was wrong? (The Signal)
