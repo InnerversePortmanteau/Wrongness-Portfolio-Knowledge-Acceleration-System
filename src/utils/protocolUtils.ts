@@ -19,7 +19,7 @@ export const updateProtocolMetrics = (protocol: Protocol, logData: ProtocolLogDa
   const totalApplications = protocol.timesApplied + 1;
   const currentSuccessfulApplications = protocol.timesApplied * (protocol.successRate / 100);
   const newSuccessfulApplications = currentSuccessfulApplications + (logData.wasSuccess ? 1 : 0);
-  const newSuccessRate = Math.round((newSuccessfulApplications / totalApplications) * 100);
+  const newSuccessRate = Math.min(100, Math.round((newSuccessfulApplications / totalApplications) * 100));
   const totalTimeSavedSoFar = protocol.avgTimeSaved * protocol.timesApplied;
   const newTotalTimeSaved = totalTimeSavedSoFar + logData.timeSaved;
   const newAvgTimeSaved = Math.round(newTotalTimeSaved / totalApplications);
@@ -44,7 +44,20 @@ export const createProtocol = (
   existingProtocols: Protocol[],
   artifactSourceId: string
 ): Protocol => {
-  const newIdNumber = existingProtocols.length > 0 ? Math.max(...existingProtocols.map(p => parseInt(p.id.split('-')[1]))) + 1 : 1;
+  // In a larger-scale application, this ID generation would be handled by a database sequence
+  // or a dedicated state counter to avoid iterating over the entire array.
+  const maxId = existingProtocols.reduce((max, p) => {
+    const idParts = p.id.split('-');
+    if (idParts.length === 2) {
+      const num = parseInt(idParts[1]);
+      if (!isNaN(num)) {
+        return Math.max(max, num);
+      }
+    }
+    return max;
+  }, 0);
+  const newIdNumber = maxId + 1;
+
   return {
     ...protocolData,
     id: `P-${String(newIdNumber).padStart(3, '0')}`,

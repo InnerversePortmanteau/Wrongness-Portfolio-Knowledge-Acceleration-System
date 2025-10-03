@@ -1,6 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import ArtifactsTab from './ArtifactsTab.tsx';
 import { Artifact } from '../types.ts';
 
@@ -41,15 +42,27 @@ const mockArtifacts: Artifact[] = [
 ];
 
 describe('ArtifactsTab', () => {
-  // The component uses <Link> from react-router-dom, so we need to wrap it in a Router for tests
-  const renderComponent = () => render(
+  const renderComponent = (artifacts: Artifact[]) => render(
     <Router>
-      <ArtifactsTab artifacts={mockArtifacts} />
+      <ArtifactsTab artifacts={artifacts} />
     </Router>
   );
 
-  it('filters artifacts based on the search term', () => {
-    renderComponent();
+  it('renders all artifacts initially', () => {
+    renderComponent(mockArtifacts);
+    expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
+    expect(screen.getByText('A Mistake with Databases')).toBeInTheDocument();
+  });
+
+  it('shows a message when no artifacts are provided', () => {
+    renderComponent([]);
+    expect(screen.getByText('No artifacts found.')).toBeInTheDocument();
+    expect(screen.getByText('Get started by creating a new artifact.')).toBeInTheDocument();
+  });
+
+  it('filters artifacts based on the search term', async () => {
+    const user = userEvent.setup();
+    renderComponent(mockArtifacts);
 
     // Initially, both artifacts should be visible
     expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
@@ -57,42 +70,67 @@ describe('ArtifactsTab', () => {
 
     // Find the search input and type a search term
     const searchInput = screen.getByPlaceholderText('Search artifacts...');
-    fireEvent.change(searchInput, { target: { value: 'debug' } });
+    await user.type(searchInput, 'debug');
 
     // After searching, only the matching artifact should be visible
     expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
     expect(screen.queryByText('A Mistake with Databases')).not.toBeInTheDocument();
 
     // Clear the search
-    fireEvent.change(searchInput, { target: { value: '' } });
+    await user.clear(searchInput);
 
     // Both artifacts should be visible again
     expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
     expect(screen.getByText('A Mistake with Databases')).toBeInTheDocument();
   });
 
-  it('filters artifacts based on the status filter', () => {
-    renderComponent();
-
-    // Initially, both artifacts are visible
-    expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
-    expect(screen.getByText('A Mistake with Databases')).toBeInTheDocument();
+  it('filters artifacts based on the status filter', async () => {
+    const user = userEvent.setup();
+    renderComponent(mockArtifacts);
 
     // Find the dropdown by its role
     const statusFilter = screen.getByRole('combobox');
 
     // Filter by 'evergreen'
-    fireEvent.change(statusFilter, { target: { value: 'evergreen' } });
+    await user.selectOptions(statusFilter, 'evergreen');
 
     // Only the evergreen artifact should be visible
     expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
     expect(screen.queryByText('A Mistake with Databases')).not.toBeInTheDocument();
 
     // Filter by 'active'
-    fireEvent.change(statusFilter, { target: { value: 'active' } });
+    await user.selectOptions(statusFilter, 'active');
 
     // Only the active artifact should be visible
     expect(screen.queryByText('I Was Wrong About Debugging')).not.toBeInTheDocument();
     expect(screen.getByText('A Mistake with Databases')).toBeInTheDocument();
+  });
+
+  it('shows a message when no artifacts match the filters', async () => {
+    const user = userEvent.setup();
+    renderComponent(mockArtifacts);
+
+    const searchInput = screen.getByPlaceholderText('Search artifacts...');
+    await user.type(searchInput, 'nonexistent search term');
+
+    expect(screen.getByText('No artifacts match your criteria.')).toBeInTheDocument();
+    expect(screen.queryByText('I Was Wrong About Debugging')).not.toBeInTheDocument();
+  });
+
+  it('updates displayed artifacts when props change', () => {
+    const { rerender } = render(
+      <Router>
+        <ArtifactsTab artifacts={mockArtifacts} />
+      </Router>
+    );
+    expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
+
+    rerender(
+      <Router>
+        <ArtifactsTab artifacts={[]} />
+      </Router>
+    );
+    expect(screen.queryByText('I Was Wrong About Debugging')).not.toBeInTheDocument();
+    expect(screen.getByText('No artifacts found.')).toBeInTheDocument();
   });
 });

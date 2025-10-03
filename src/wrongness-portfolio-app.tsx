@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, BookOpen, Zap } from 'lucide-react';
+import { Plus, Zap } from 'lucide-react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import usePersistentState from './hooks/usePersistentState.ts';
 import { Artifact, Dataset, MiningTask, Protocol } from './types.ts';
@@ -7,7 +7,8 @@ import { calculateDatasetROI, calculateDatasetScore } from './utils/calculations
 import { createProtocol, updateProtocolMetrics } from './utils/protocolUtils.ts';
 import { createArtifact, updateArtifact } from './utils/artifactUtils.ts';
 
-import HomePage from './components/HomePage.tsx';
+import Sidebar from './Sidebar.tsx';
+// import HomePage from './components/HomePage.tsx'; // No longer used after UX makeover
 import DashboardTab from './components/DashboardTab.tsx';
 import ArtifactsTab from './components/ArtifactsTab.tsx';
 import DatasetsTab from './components/DatasetsTab.tsx';
@@ -16,59 +17,8 @@ import MiningTab from './components/MiningTab.tsx';
 import NewArtifactModal, { NewArtifactData } from './components/NewArtifactModal.tsx';
 import NewDatasetModal, { NewDatasetData } from './components/NewDatasetModal.tsx';
 import ArtifactDetailPage from './components/ArtifactDetailPage.tsx';
-
-const AppContent = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const activeTab = useMemo(() => {
-    const path = location.pathname;
-    if (path.startsWith('/artifacts')) return 'artifacts';
-    if (path.startsWith('/datasets')) return 'datasets';
-    if (path.startsWith('/protocols')) return 'protocols';
-    if (path.startsWith('/mining')) return 'mining';
-    if (path.startsWith('/dashboard')) return 'dashboard';
-    return 'dashboard';
-  }, [location.pathname]);
-
-  const navLinks = [
-    { path: '/', label: 'Home', id: 'home' },
-    { path: '/dashboard', label: 'Dashboard', id: 'dashboard' },
-    { path: '/artifacts', label: 'Artifacts', id: 'artifacts' },
-    { path: '/datasets', label: 'Datasets', id: 'datasets' },
-    { path: '/protocols', label: 'Protocols', id: 'protocols' },
-    { path: '/mining', label: 'Mining', id: 'mining' },
-  ];
-
-  const handleStartMining = () => {
-    navigate('/mining');
-    // Assuming setIsFabMenuOpen is managed in the parent component
-  };
-
-  return (
-    <>
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex space-x-8">
-            {navLinks.map(link => (
-              <Link
-                key={link.id}
-                to={link.path}
-                className={`px-1 py-4 text-sm font-medium border-b-2 transition ${
-                  activeTab === link.id
-                    ? 'border-purple-600 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </nav>
-    </>
-  );
-}
+import NewProtocolModal, { NewProtocolData } from './components/NewProtocolModal.tsx';
+import EditArtifactModal from './components/EditArtifactModal.tsx';
 
 const WrongnessPortfolioApp = () => {
   const [isNewArtifactModalOpen, setIsNewArtifactModalOpen] = useState(false);
@@ -206,7 +156,12 @@ const WrongnessPortfolioApp = () => {
   }
 
   const handleAddDataset = (newDatasetData: NewDatasetData) => {
-    const newIdNumber = datasets.length > 0 ? Math.max(...datasets.map((d: Dataset) => parseInt(d.id.split('-')[1]))) + 1 : 1;
+    const maxId = datasets.reduce((max, d) => {
+      const num = parseInt(d.id.split('-')[1]);
+      return isNaN(num) ? max : Math.max(max, num);
+    }, 0);
+    const newIdNumber = maxId + 1;
+
     const newDataset: Dataset = {
       ...newDatasetData,
       id: `DS-${String(newIdNumber).padStart(3, '0')}`,
@@ -216,7 +171,7 @@ const WrongnessPortfolioApp = () => {
       protocolsValidated: 0,
     };
 
-    setDatasets((prevDatasets: Artifact[]) => [...prevDatasets, newDataset]);
+    setDatasets((prevDatasets) => [...prevDatasets, newDataset]);
   };
 
   const handleAddProtocol = (protocolData: NewProtocolData) => {
@@ -236,7 +191,7 @@ const WrongnessPortfolioApp = () => {
 
   const handleOpenEditModal = (artifact: Artifact) => {
     setEditingArtifact(artifact);
-    setIsEditModalOpen(true);
+    setIsEditArtifactModalOpen(true);
   };
 
   const sortedDatasets = useMemo(() => {
@@ -261,43 +216,31 @@ const WrongnessPortfolioApp = () => {
     };
 
     return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Wrongness Portfolio</h1>
-                <p className="text-sm text-gray-500">Knowledge Acceleration System</p>
-              </div>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="bg-white border-b border-gray-200">
+          <div className="px-6 py-3">
+            <div className="flex items-center justify-end">
+              <button onClick={openNewArtifactModal} className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium">
+                <Plus className="w-4 h-4" />
+                <span>New Artifact</span>
+              </button>
             </div>
-            <button onClick={openNewArtifactModal} className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-              <Plus className="w-4 h-4" />
-              <span>New Artifact</span>
-            </button>
           </div>
-        </div>
-      </header>
-
-      {/* Navigation */}
-      <AppContent />
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <Routes>
-          <Route path="/" element={<HomePage stats={stats} miningQueue={miningQueue} protocols={protocols} onOpenNewArtifactModal={() => setIsNewArtifactModalOpen(true)} />} />
-          <Route path="/dashboard" element={<DashboardTab stats={stats} miningQueue={miningQueue} protocols={protocols} />} />
-          <Route path="/artifacts" element={<ArtifactsTab artifacts={artifacts} />} />
-          <Route path="/artifacts/:id" element={<ArtifactDetailPage artifacts={artifacts} protocols={protocols} onOpenNewProtocolModal={openNewProtocolModal} onEdit={handleOpenEditModal} />} />
-          <Route path="/datasets" element={<DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} />} />
-          <Route path="/protocols" element={<ProtocolsTab protocols={protocols} />} />
-          <Route path="/mining" element={<MiningTab />} />
-        </Routes>
-      </main>
+        </header>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+          <Routes>
+            <Route path="/" element={<DashboardTab stats={stats} miningQueue={miningQueue} protocols={protocols} />} />
+            <Route path="/dashboard" element={<DashboardTab stats={stats} miningQueue={miningQueue} protocols={protocols} />} />
+            <Route path="/artifacts" element={<ArtifactsTab artifacts={artifacts} />} />
+            <Route path="/artifacts/:id" element={<ArtifactDetailPage artifacts={artifacts} protocols={protocols} onOpenNewProtocolModal={openNewProtocolModal} onEdit={handleOpenEditModal} />} />
+            <Route path="/datasets" element={<DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} />} />
+            <Route path="/protocols" element={<ProtocolsTab protocols={protocols} />} />
+            <Route path="/mining" element={<MiningTab />} />
+          </Routes>
+        </main>
+      </div>
 
       {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6">
@@ -334,6 +277,13 @@ const WrongnessPortfolioApp = () => {
         onClose={() => setIsNewProtocolModalOpen(false)}
         onSave={handleAddProtocol}
         artifactSourceId={currentArtifactSource}
+      />
+
+      <EditArtifactModal
+        isOpen={isEditArtifactModalOpen}
+        onClose={() => setIsEditArtifactModalOpen(false)}
+        onSave={handleUpdateArtifact}
+        artifact={editingArtifact}
       />
     </div>
   );

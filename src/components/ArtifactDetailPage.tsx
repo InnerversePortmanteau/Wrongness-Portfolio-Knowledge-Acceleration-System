@@ -1,12 +1,13 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, Plus } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Plus, Edit } from 'lucide-react';
 import { Artifact, Protocol } from '../types';
 
 interface ArtifactDetailPageProps {
   artifacts: Artifact[];
   protocols: Protocol[];
   onOpenNewProtocolModal: (artifactId: string) => void;
+  onEdit: (artifact: Artifact) => void;
 }
 
 const ArtifactDetailPage: React.FC<ArtifactDetailPageProps> = ({ artifacts, protocols, onOpenNewProtocolModal }) => {
@@ -48,9 +49,13 @@ const ArtifactDetailPage: React.FC<ArtifactDetailPageProps> = ({ artifacts, prot
               <span>Created: {artifact.dateCreated}</span>
             </div>
           </div>
-          <span className="px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-            {artifact.status}
-          </span>
+          <div className="flex items-center space-x-2">
+            <button onClick={() => onEdit(artifact)} className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-medium">
+              <Edit className="w-4 h-4" />
+              <span>Edit</span>
+            </button>
+            <span className="px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">{artifact.status}</span>
+          </div>
         </div>
       </div>
 

@@ -54,6 +54,22 @@ describe('updateProtocolMetrics', () => {
     expect(updatedProtocol.successRate).toBe(100);
     expect(updatedProtocol.avgTimeSaved).toBe(50);
   });
+
+  it('should cap the success rate at 100%', () => {
+    const protocolWithHighRate: Protocol = {
+      ...baseProtocol,
+      timesApplied: 1,
+      successRate: 100, // 1 successful application
+    };
+    // Log a new success. The rate should remain 100%, not exceed it.
+    const logData = { wasSuccess: true, timeSaved: 20 };
+    const updatedProtocol = updateProtocolMetrics(protocolWithHighRate, logData);
+
+    expect(updatedProtocol.timesApplied).toBe(2);
+    // New success rate: (1 + 1) / 2 = 100%
+    expect(updatedProtocol.successRate).toBe(100);
+  });
+
 });
 
 describe('createProtocol', () => {
