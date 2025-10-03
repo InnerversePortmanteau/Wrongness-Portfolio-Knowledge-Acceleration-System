@@ -564,6 +564,30 @@ The user wants to add a crucial feature to the application: the ability to edit 
 
 ---
 
+## Entry: 2025-10-02 - Resolving Duplicate Default Export
+
+### 1. User Request
+
+> The user provided a Vite build error: `Multiple exports with the same name "default"` in `src/components/HomePage.tsx`.
+
+### 2. Obstacle Analysis
+
+- **Symptom**: The Vite dev server fails to build due to a JavaScript syntax error.
+- **Root Cause Investigation (Fishbone)**:
+  - **Manpower (AI Error)**: In the previous cycle, while fixing a missing default export, I incorrectly added a _second_ `export default HomePage;` statement to the file, leading to a duplicate export error.
+  - **Method (Process)**: Our `pre-commit` hook, which includes `npm run build`, successfully caught this syntax error. This demonstrates the value of our automated quality gates.
+- **Obstacle Categorization (Examinable Assumption)**: The AI assumed its previous fix was correct and complete. The build error immediately invalidated this assumption.
+
+### 3. Break-Fix and Preventative Measure
+
+1.  **Break-Fix**: The duplicate `export default HomePage;` line was removed from `src/components/HomePage.tsx`.
+2.  **Preventative Measure**: This cycle serves as a powerful validation of our `pre-commit` hook. It prevented a regression from being committed. The learning is to be more careful during "break-fix" cycles, but also to trust the automated process to act as a safety net.
+
+### 4. Outcome
+
+- The build error is resolved.
+- We have a documented case of our automated quality process successfully preventing a faulty commit, which strengthens our confidence in the system.
+
 ## Entry: 2025-11-01 - Automating Date Provision in Development Process
 
 ### 1. User Request

@@ -5,8 +5,9 @@ import usePersistentState from './hooks/usePersistentState.ts';
 import { Artifact, Dataset, MiningTask, Protocol } from './types.ts';
 import { calculateDatasetROI, calculateDatasetScore } from './utils/calculations.ts';
 import { createProtocol, updateProtocolMetrics } from './utils/protocolUtils.ts';
-import { createArtifact } from './utils/artifactUtils.ts';
+import { createArtifact, updateArtifact } from './utils/artifactUtils.ts';
 
+import HomePage from './components/HomePage.tsx';
 import DashboardTab from './components/DashboardTab.tsx';
 import ArtifactsTab from './components/ArtifactsTab.tsx';
 import DatasetsTab from './components/DatasetsTab.tsx';
@@ -14,8 +15,6 @@ import ProtocolsTab from './components/ProtocolsTab.tsx';
 import MiningTab from './components/MiningTab.tsx';
 import NewArtifactModal, { NewArtifactData } from './components/NewArtifactModal.tsx';
 import NewDatasetModal, { NewDatasetData } from './components/NewDatasetModal.tsx';
-import LogProtocolUseModal, { LogData } from './components/LogProtocolUseModal.tsx';
-import NewProtocolModal, { NewProtocolData } from './components/NewProtocolModal.tsx';
 import ArtifactDetailPage from './components/ArtifactDetailPage.tsx';
 
 const AppContent = () => {
@@ -28,11 +27,13 @@ const AppContent = () => {
     if (path.startsWith('/datasets')) return 'datasets';
     if (path.startsWith('/protocols')) return 'protocols';
     if (path.startsWith('/mining')) return 'mining';
+    if (path.startsWith('/dashboard')) return 'dashboard';
     return 'dashboard';
   }, [location.pathname]);
 
   const navLinks = [
-    { path: '/', label: 'Dashboard', id: 'dashboard' },
+    { path: '/', label: 'Home', id: 'home' },
+    { path: '/dashboard', label: 'Dashboard', id: 'dashboard' },
     { path: '/artifacts', label: 'Artifacts', id: 'artifacts' },
     { path: '/datasets', label: 'Datasets', id: 'datasets' },
     { path: '/protocols', label: 'Protocols', id: 'protocols' },
@@ -71,12 +72,13 @@ const AppContent = () => {
 
 const WrongnessPortfolioApp = () => {
   const [isNewArtifactModalOpen, setIsNewArtifactModalOpen] = useState(false);
+  const [isEditArtifactModalOpen, setIsEditArtifactModalOpen] = useState(false);
   const [isNewDatasetModalOpen, setIsNewDatasetModalOpen] = useState(false);
-  const [isLogProtocolModalOpen, setIsLogProtocolModalOpen] = useState(false);
   const [isNewProtocolModalOpen, setIsNewProtocolModalOpen] = useState(false);
   const [currentArtifactSource, setCurrentArtifactSource] = useState<string>('');
+  const [editingArtifact, setEditingArtifact] = useState<Artifact | null>(null);
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
-  const [artifacts, setArtifacts] = usePersistentState<Artifact[]>('artifacts', [
+  const [artifacts, setArtifacts] = usePersistentState<Artifact[]>('artifacts', [ // Mock data
     {
       id: 'WP-001',
       title: 'I Was Wrong About Debugging',
@@ -85,13 +87,7 @@ const WrongnessPortfolioApp = () => {
       wrongModel: 'The error message points to the problem\'s source. I assumed a Python ImportError meant the package was missing.',
       signal: 'The package was confirmed to be installed in the virtual environment, yet the error persisted. This indicated the issue was with the environment or path, not the package itself.',
       rebuild: 'Adopt a "System-First" protocol. Before debugging application code, always verify the integrity and configuration of the execution environment (e.g., virtual environment activation, system path, dependencies).',
-      status: 'evergreen',
-      confidence: { protocol1: 'high', protocol2: 'high', protocol3: 'medium', protocol4: 'medium' },
-      dateCreated: '2023-10-01',
-      protocols: 4,
-      timesSaved: 8,
-      avgTimeSaved: 45,
-      validated: true
+      status: 'evergreen'
     }
   ]);
   
@@ -191,10 +187,23 @@ const WrongnessPortfolioApp = () => {
     }
   ]);
 
-  const handleAddArtifact = (newArtifactData: NewArtifactData) => {
-    const newArtifact = createArtifact(newArtifactData, artifacts);
+  const handleLogProtocolUse = (logData: { protocolId: string; wasSuccess: boolean; timeSaved: number; }) => {
+    const protocolToUpdate = protocols.find(p => p.id === logData.protocolId);
+    if (protocolToUpdate) {
+      const updatedProtocol = updateProtocolMetrics(protocolToUpdate, logData);
+      setProtocols(protocols.map(p => p.id === updatedProtocol.id ? updatedProtocol : p));
+    }
+  };
+
+  const handleAddArtifact = (data: NewArtifactData) => {
+    const newArtifact = createArtifact(data.title, data.domain, data.category);
     setArtifacts(prevArtifacts => [...prevArtifacts, newArtifact]);
   };
+
+  const handleUpdateArtifact = (updated: Artifact) => {
+    setArtifacts(prev => updateArtifact(prev, updated));
+    setEditingArtifact(null);
+  }
 
   const handleAddDataset = (newDatasetData: NewDatasetData) => {
     const newIdNumber = datasets.length > 0 ? Math.max(...datasets.map((d: Dataset) => parseInt(d.id.split('-')[1]))) + 1 : 1;
@@ -223,6 +232,11 @@ const WrongnessPortfolioApp = () => {
 
   const openNewArtifactModal = () => {
     setIsNewArtifactModalOpen(true); setIsFabMenuOpen(false);
+  };
+
+  const handleOpenEditModal = (artifact: Artifact) => {
+    setEditingArtifact(artifact);
+    setIsEditModalOpen(true);
   };
 
   const sortedDatasets = useMemo(() => {
@@ -275,10 +289,11 @@ const WrongnessPortfolioApp = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <Routes>
-          <Route path="/" element={<DashboardTab stats={stats} miningQueue={miningQueue} protocols={protocols} />} />
+          <Route path="/" element={<HomePage stats={stats} miningQueue={miningQueue} protocols={protocols} onOpenNewArtifactModal={() => setIsNewArtifactModalOpen(true)} />} />
+          <Route path="/dashboard" element={<DashboardTab stats={stats} miningQueue={miningQueue} protocols={protocols} />} />
           <Route path="/artifacts" element={<ArtifactsTab artifacts={artifacts} />} />
-          <Route path="/artifacts/:id" element={<ArtifactDetailPage artifacts={artifacts} protocols={protocols} onOpenNewProtocolModal={openNewProtocolModal} />} />
-          <Route path="/datasets" element={<DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} onOpenAddDatasetModal={() => setIsNewDatasetModalOpen(true)} onAddDataset={handleAddDataset} />} />
+          <Route path="/artifacts/:id" element={<ArtifactDetailPage artifacts={artifacts} protocols={protocols} onOpenNewProtocolModal={openNewProtocolModal} onEdit={handleOpenEditModal} />} />
+          <Route path="/datasets" element={<DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} />} />
           <Route path="/protocols" element={<ProtocolsTab protocols={protocols} />} />
           <Route path="/mining" element={<MiningTab />} />
         </Routes>
@@ -288,10 +303,7 @@ const WrongnessPortfolioApp = () => {
       <div className="fixed bottom-6 right-6">
         {isFabMenuOpen && (
           <div className="absolute bottom-full right-0 mb-3 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm animate-fade-in-up">
-            <div className="font-medium text-gray-900 mb-2 px-2">Quick Actions</div>
-            <button onClick={() => { setIsLogProtocolModalOpen(true); setIsFabMenuOpen(false); }} className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
-              <span>Log Protocol Use</span>
-            </button>
+            <div className="font-medium text-gray-900 mb-2 px-2">Quick Actions</div>            
             <button onClick={handleStartMining} className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
               <span>Start Mining</span>
             </button>
@@ -315,13 +327,6 @@ const WrongnessPortfolioApp = () => {
         isOpen={isNewDatasetModalOpen}
         onClose={() => setIsNewDatasetModalOpen(false)}
         onSave={handleAddDataset}
-      />
-
-      <LogProtocolUseModal
-        isOpen={isLogProtocolModalOpen}
-        onClose={() => setIsLogProtocolModalOpen(false)}
-        onSave={handleLogProtocolUse}
-        protocols={protocols}
       />
 
       <NewProtocolModal
