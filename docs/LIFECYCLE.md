@@ -14,7 +14,12 @@ Our development process is iterative and follows these distinct phases for any g
   - Together, we agree on the scope, potential UI/UX changes, and architectural impact.
 - **Documentation**: The cycle is logged in `docs/DEVELOPMENT_LOG.md`. Architectural changes are noted in `docs/ARCHITECTURE.md` and `docs/DECISION_LOG.md`.
 - **Quality Process**: **Static Testing**. We review the requirements and design for clarity, feasibility, and alignment with user journeys before any code is written.
-- **Root Cause Analysis (for bugs/issues)**: For any recurring obstacle or significant bug, we will perform a **Fishbone (Ishikawa) Analysis** to explore systemic causes across categories (e.g., the 6 Ms: Machine, Method, Material, Manpower, Measurement, Environment). The findings will be logged in the corresponding `DEVELOPMENT_LOG.md` entry.
+- **Obstacle Analysis (for bugs/issues)**: For any recurring obstacle or significant bug, we will perform a deeper analysis using the framework from `docs/LEARNING_ARCHITECTURE.md`. This involves:
+  1.  **Symptom Description**: Clearly state the problem (e.g., the error message, the unexpected behavior).
+  2.  **Root Cause Investigation (Fishbone)**: Use a Fishbone (Ishikawa) diagram to explore systemic causes across categories (e.g., Machine, Method, Manpower).
+  3.  **Obstacle Categorization**: Identify the primary type of obstacle we are facing, according to our Learning Architecture: - **Examinable Assumption**: A belief we can consciously question. - **Un-examinable Assumption (Deep Structure)**: A hidden framework revealed by the failure. - **Conceptual Void**: The absence of a concept needed to solve the problem. - **Actively Maintained Ignorance**: A systemic or personal blind spot.
+      The findings of this multi-layered analysis will be logged in the corresponding `DEVELOPMENT_LOG.md` entry.
+- **Quality Process**: **Dependency Vetting**. When adding a new dependency, especially for tooling, we will consult its official documentation to verify the current, recommended installation and setup procedures.
 
 ### Phase 2: Implementation & Unit Testing
 
@@ -30,7 +35,8 @@ Our development process is iterative and follows these distinct phases for any g
 
 - **Activities**:
   - The Human Developer integrates the new code into the application by applying the provided diffs.
-  - The application is run locally to observe the new feature in the context of the entire system.
+  - The application is run locally (`npm test` and `npm run dev`) to observe the new feature in the context of the entire system. The `npm test` command automatically logs its output for the AI to review in the next cycle.
+  - **Automated Build Verification**: A `pre-commit` hook automatically runs `npm run build` before every commit. This ensures no code that fails the production build can enter the repository, making this a fully automated quality gate.
 - **Quality Process**:
   - **Integration Testing**: Manually verifying that new components work together. For example, ensuring the "New Artifact" button correctly opens the `NewArtifactModal` and that saving the modal's form correctly updates the state that is passed to the `ArtifactsTab`.
   - **System Testing**: Evaluating the end-to-end flow. Does the entire user journey work as expected?

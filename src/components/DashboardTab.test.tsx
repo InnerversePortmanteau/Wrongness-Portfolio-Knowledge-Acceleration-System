@@ -1,7 +1,6 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DashboardTab from './DashboardTab';
-import { MiningTask, Protocol } from '../types';
+import DashboardTab from './DashboardTab.tsx';
+import { MiningTask, Protocol } from '../types.ts';
 
 describe('DashboardTab', () => {
   it('renders the total artifacts stat card correctly', () => {

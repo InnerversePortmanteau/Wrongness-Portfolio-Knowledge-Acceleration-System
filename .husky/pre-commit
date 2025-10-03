@@ -1,0 +1,1 @@
+./scripts/check-config.sh && npm test && npm run build

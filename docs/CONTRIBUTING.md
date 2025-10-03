@@ -55,8 +55,13 @@ This command executes all files ending in `.test.tsx` and provides a summary of 
 ## Contribution Workflow
 
 1.  **Provide Context**: Before starting a new development cycle, run the "Gemini: Load Project Context" task in VS Code and paste the output into our chat.
+    - **How to run the task**:
+      1. Open the Command Palette (`Ctrl+Shift+P` on Windows/Linux, `Cmd+Shift+P` on macOS).
+      2. Type `Tasks: Run Task`.
+      3. Select `Gemini: Load Project Context`.
+      4. The full project context will be copied to your clipboard. Paste this as the first part of your request.
 2.  **Define the Feature**: Clearly state the goal for the new feature or bug fix.
-3.  **Implement & Test**: We will work together to write the code and corresponding unit tests.
+3.  **Implement & Test**: We will work together to write the code and corresponding unit tests. The "Load Project Context" task automatically includes the current date, so there is no need to provide it manually.
 4.  **Validate**: Perform manual acceptance and regression testing as outlined in our `docs/LIFECYCLE.md`.
 5.  **Document & Commit**: I will generate the documentation updates and commit message. You will review and commit the changes.
 

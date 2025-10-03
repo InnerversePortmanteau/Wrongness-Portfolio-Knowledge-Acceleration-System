@@ -1,0 +1,6 @@
+/* Basic Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add any global styles or overrides here */

@@ -1,10 +1,11 @@
-import { LucideIcon } from 'lucide-react';
-
 export interface Artifact {
   id: string;
   title: string;
   domain: string;
   category: string;
+  wrongModel: string;
+  signal: string;
+  rebuild: string;
   status: 'evergreen' | 'active' | 'archived';
   confidence: Record<string, 'high' | 'medium' | 'low'>;
   dateCreated: string;

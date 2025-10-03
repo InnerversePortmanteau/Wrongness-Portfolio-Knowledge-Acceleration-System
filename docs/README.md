@@ -170,25 +170,25 @@ npm run dev
 
 ## Philosophy & Principles
 
-### 1. Wrongness as Data
+### 1. Ignorance is Structured, Not Neutral
 
-Frustration is a signal, not noise. Extended debugging time indicates your mental model is broken at a level above the code.
+Our "not-knowing" is not a blank slate. It is a structured landscape shaped by our existing mental models, biases, and the systems we operate in. The goal is not to achieve a "blank" state, but to make this invisible landscape and its features visible.
 
-### 2. System-First Thinking
+### 2. Obstacles are Multi-Layered
 
-Most "code bugs" are actually system integrity issues (environment, dependencies, configuration). Always verify the ground truth before changing code.
+The path to learning is blocked by more than just simple mistakes. We must learn to identify different categories of obstacles: from conscious **examinable assumptions**, to the **un-examinable assumptions** of our core frameworks, to **conceptual voids** where we lack the words to even ask the right question.
 
-### 3. High-Fidelity Data
+### 3. Wrongness is the Signal of a Deeper Structure
 
-Generic error messages hide specific problems. Your first goal in any investigation is to improve the quality of information the system gives you.
+A persistent error or frustration is not a failure of code, but a high-quality signal that our underlying model of the system is flawed. We don't just fix the bug; we use the signal to rebuild the model.
 
-### 4. Strategic Retreat
+### 4. Documentation is the Act of Rebuilding
 
-When a feature fights you, retreat to a known-good state. Prioritize a functional process over a broken outcome.
+The value of an insight is multiplied by its documentation. An undocumented solution is a one-time fix; a documented learning cycle is a permanent upgrade to the system's intelligence.
 
-### 5. Knowledge Compounds
+### 5. Some Blindness is Functional
 
-Every documented error becomes a permanent system upgrade. After 10, 50, 100 artifacts, you have a queryable library of hard-won wisdom.
+Not all assumptions should be examined. Some are "enabling fictions" that allow us to proceed without being paralyzed by infinite questioning. The goal is to distinguish between the assumptions that obstruct learning and those that enable it.
 
 ## Example Artifacts
 

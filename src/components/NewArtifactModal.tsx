@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { Artifact } from '../types';
+import { Artifact } from '../types.ts';
 
-type NewArtifactData = Omit<Artifact, 'id' | 'dateCreated' | 'protocols' | 'timesSaved' | 'avgTimeSaved' | 'validated' | 'confidence' | 'status'>;
+export type NewArtifactData = Omit<Artifact, 'id' | 'dateCreated' | 'protocols' | 'timesSaved' | 'avgTimeSaved' | 'validated' | 'confidence' | 'status'>;
 
 interface NewArtifactModalProps {
   isOpen: boolean;
@@ -14,6 +14,9 @@ const NewArtifactModal: React.FC<NewArtifactModalProps> = ({ isOpen, onClose, on
   const [title, setTitle] = useState('');
   const [domain, setDomain] = useState('');
   const [category, setCategory] = useState('');
+  const [wrongModel, setWrongModel] = useState('');
+  const [signal, setSignal] = useState('');
+  const [rebuild, setRebuild] = useState('');
 
   if (!isOpen) {
     return null;
@@ -25,11 +28,14 @@ const NewArtifactModal: React.FC<NewArtifactModalProps> = ({ isOpen, onClose, on
       alert('Please fill out all fields.');
       return;
     }
-    onSave({ title, domain, category });
+    onSave({ title, domain, category, wrongModel, signal, rebuild });
     // Reset form and close
     setTitle('');
     setDomain('');
     setCategory('');
+    setWrongModel('');
+    setSignal('');
+    setRebuild('');
     onClose();
   };
 
@@ -85,6 +91,47 @@ const NewArtifactModal: React.FC<NewArtifactModalProps> = ({ isOpen, onClose, on
                 placeholder="e.g., Process, Technical, Communication"
                 required
               />
+            </div>
+            <div className="pt-2 space-y-4">
+               <div>
+                <label htmlFor="wrongModel" className="block text-sm font-medium text-gray-700 mb-1">
+                  The Wrong Model
+                </label>
+                <textarea
+                  id="wrongModel"
+                  value={wrongModel}
+                  onChange={(e) => setWrongModel(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  rows={3}
+                  placeholder="What flawed assumption or mental model did you start with?"
+                />
+              </div>
+               <div>
+                <label htmlFor="signal" className="block text-sm font-medium text-gray-700 mb-1">
+                  The Signal
+                </label>
+                <textarea
+                  id="signal"
+                  value={signal}
+                  onChange={(e) => setSignal(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  rows={3}
+                  placeholder="What data or event proved your model was wrong?"
+                />
+              </div>
+               <div>
+                <label htmlFor="rebuild" className="block text-sm font-medium text-gray-700 mb-1">
+                  The Rebuild
+                </label>
+                <textarea
+                  id="rebuild"
+                  value={rebuild}
+                  onChange={(e) => setRebuild(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  rows={3}
+                  placeholder="What is the new, corrected model or process?"
+                />
+              </div>
             </div>
           </div>
           <div className="p-6 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">

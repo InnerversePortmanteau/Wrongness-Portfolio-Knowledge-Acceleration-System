@@ -1,30 +1,35 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, BookOpen, Zap } from 'lucide-react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import usePersistentState from './src/hooks/usePersistentState';
-import { Artifact, Dataset, MiningTask, Protocol } from './src/types';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import usePersistentState from './hooks/usePersistentState.ts';
+import { Artifact, Dataset, MiningTask, Protocol } from './types.ts';
+import { calculateDatasetROI, calculateDatasetScore } from './utils/calculations.ts';
+import { createProtocol, updateProtocolMetrics } from './utils/protocolUtils.ts';
+import { createArtifact } from './utils/artifactUtils.ts';
 
-import DashboardTab from './src/components/DashboardTab';
-import ArtifactsTab from './src/components/ArtifactsTab';
-import DatasetsTab from './src/components/DatasetsTab';
-import ProtocolsTab from './src/components/ProtocolsTab';
-import MiningTab from './src/components/MiningTab';
-import NewArtifactModal from './src/components/NewArtifactModal';
-import NewDatasetModal, { NewDatasetData } from './src/components/NewDatasetModal';
-import LogProtocolUseModal, { LogData } from './src/components/LogProtocolUseModal';
-import ArtifactDetailPage from './src/components/ArtifactDetailPage';
+import DashboardTab from './components/DashboardTab.tsx';
+import ArtifactsTab from './components/ArtifactsTab.tsx';
+import DatasetsTab from './components/DatasetsTab.tsx';
+import ProtocolsTab from './components/ProtocolsTab.tsx';
+import MiningTab from './components/MiningTab.tsx';
+import NewArtifactModal, { NewArtifactData } from './components/NewArtifactModal.tsx';
+import NewDatasetModal, { NewDatasetData } from './components/NewDatasetModal.tsx';
+import LogProtocolUseModal, { LogData } from './components/LogProtocolUseModal.tsx';
+import NewProtocolModal, { NewProtocolData } from './components/NewProtocolModal.tsx';
+import ArtifactDetailPage from './components/ArtifactDetailPage.tsx';
 
 const AppContent = () => {
   const location = useLocation();
-  const getActiveTab = () => {
+  const navigate = useNavigate();
+
+  const activeTab = useMemo(() => {
     const path = location.pathname;
     if (path.startsWith('/artifacts')) return 'artifacts';
     if (path.startsWith('/datasets')) return 'datasets';
     if (path.startsWith('/protocols')) return 'protocols';
     if (path.startsWith('/mining')) return 'mining';
     return 'dashboard';
-  };
-  const activeTab = getActiveTab();
+  }, [location.pathname]);
 
   const navLinks = [
     { path: '/', label: 'Dashboard', id: 'dashboard' },
@@ -33,6 +38,11 @@ const AppContent = () => {
     { path: '/protocols', label: 'Protocols', id: 'protocols' },
     { path: '/mining', label: 'Mining', id: 'mining' },
   ];
+
+  const handleStartMining = () => {
+    navigate('/mining');
+    // Assuming setIsFabMenuOpen is managed in the parent component
+  };
 
   return (
     <>
@@ -63,6 +73,8 @@ const WrongnessPortfolioApp = () => {
   const [isNewArtifactModalOpen, setIsNewArtifactModalOpen] = useState(false);
   const [isNewDatasetModalOpen, setIsNewDatasetModalOpen] = useState(false);
   const [isLogProtocolModalOpen, setIsLogProtocolModalOpen] = useState(false);
+  const [isNewProtocolModalOpen, setIsNewProtocolModalOpen] = useState(false);
+  const [currentArtifactSource, setCurrentArtifactSource] = useState<string>('');
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
   const [artifacts, setArtifacts] = usePersistentState<Artifact[]>('artifacts', [
     {
@@ -70,6 +82,9 @@ const WrongnessPortfolioApp = () => {
       title: 'I Was Wrong About Debugging',
       domain: 'Software Engineering',
       category: 'Process',
+      wrongModel: 'The error message points to the problem\'s source. I assumed a Python ImportError meant the package was missing.',
+      signal: 'The package was confirmed to be installed in the virtual environment, yet the error persisted. This indicated the issue was with the environment or path, not the package itself.',
+      rebuild: 'Adopt a "System-First" protocol. Before debugging application code, always verify the integrity and configuration of the execution environment (e.g., virtual environment activation, system path, dependencies).',
       status: 'evergreen',
       confidence: { protocol1: 'high', protocol2: 'high', protocol3: 'medium', protocol4: 'medium' },
       dateCreated: '2023-10-01',
@@ -176,25 +191,13 @@ const WrongnessPortfolioApp = () => {
     }
   ]);
 
-  const handleAddArtifact = (newArtifactData: Omit<Artifact, 'id' | 'dateCreated' | 'protocols' | 'timesSaved' | 'avgTimeSaved' | 'validated' | 'confidence' | 'status'>) => {
-    const newIdNumber = artifacts.length > 0 ? Math.max(...artifacts.map(a => parseInt(a.id.split('-')[1]))) + 1 : 1;
-    const newArtifact: Artifact = {
-      ...newArtifactData,
-      id: `WP-${String(newIdNumber).padStart(3, '0')}`,
-      status: 'active',
-      confidence: {},
-      dateCreated: new Date().toISOString().split('T')[0],
-      protocols: 0,
-      timesSaved: 0,
-      avgTimeSaved: 0,
-      validated: false,
-    };
-
+  const handleAddArtifact = (newArtifactData: NewArtifactData) => {
+    const newArtifact = createArtifact(newArtifactData, artifacts);
     setArtifacts(prevArtifacts => [...prevArtifacts, newArtifact]);
   };
 
   const handleAddDataset = (newDatasetData: NewDatasetData) => {
-    const newIdNumber = datasets.length > 0 ? Math.max(...datasets.map(d => parseInt(d.id.split('-')[1]))) + 1 : 1;
+    const newIdNumber = datasets.length > 0 ? Math.max(...datasets.map((d: Dataset) => parseInt(d.id.split('-')[1]))) + 1 : 1;
     const newDataset: Dataset = {
       ...newDatasetData,
       id: `DS-${String(newIdNumber).padStart(3, '0')}`,
@@ -204,65 +207,46 @@ const WrongnessPortfolioApp = () => {
       protocolsValidated: 0,
     };
 
-    setDatasets(prevDatasets => [...prevDatasets, newDataset]);
+    setDatasets((prevDatasets: Artifact[]) => [...prevDatasets, newDataset]);
   };
 
-  const handleLogProtocolUse = (logData: LogData) => {
-    setProtocols(prevProtocols =>
-      prevProtocols.map(p => {
-        if (p.id === logData.protocolId) {
-          const totalApplications = p.timesApplied + 1;
-          
-          // Calculate new success rate
-          const currentSuccessfulApplications = p.timesApplied * (p.successRate / 100);
-          const newSuccessfulApplications = currentSuccessfulApplications + (logData.wasSuccess ? 1 : 0);
-          const newSuccessRate = Math.round((newSuccessfulApplications / totalApplications) * 100);
+  const handleAddProtocol = (protocolData: NewProtocolData) => {
+    const newProtocol = createProtocol(protocolData, protocols, currentArtifactSource);
+    setProtocols(prev => [...prev, newProtocol]);
+    setCurrentArtifactSource('');
+  };
 
-          // Calculate new average time saved
-          const totalTimeSavedSoFar = p.avgTimeSaved * p.timesApplied;
-          const newTotalTimeSaved = totalTimeSavedSoFar + logData.timeSaved;
-          const newAvgTimeSaved = Math.round(newTotalTimeSaved / totalApplications);
-
-          return {
-            ...p,
-            timesApplied: totalApplications,
-            successRate: newSuccessRate,
-            avgTimeSaved: newAvgTimeSaved,
-          };
-        }
-        return p;
-      })
-    );
+  const openNewProtocolModal = (artifactId: string) => {
+    setCurrentArtifactSource(artifactId);
+    setIsNewProtocolModalOpen(true);
   };
 
   const openNewArtifactModal = () => {
     setIsNewArtifactModalOpen(true); setIsFabMenuOpen(false);
   };
 
-  const calculateDatasetROI = (dataset: Dataset) => {
-    if (dataset.timeInvested === 0) return 0;
-    const roi = (dataset.protocolsValidated * 30) / (dataset.timeInvested * 60);
-    return roi.toFixed(1);
-  };
-
-  const calculateDatasetScore = (dataset) => {
-    return (dataset.relevance * 3) + (dataset.signalDensity * 2) + (dataset.transferability * 2);
-  };
-
   const sortedDatasets = useMemo(() => {
-    return [...datasets].sort((a, b) => calculateDatasetScore(b) - calculateDatasetScore(a)) as Dataset[];
+    return [...datasets].sort((a: Dataset, b: Dataset) => calculateDatasetScore(b) - calculateDatasetScore(a)) as Dataset[];
   }, [datasets]);
 
   const stats = {
     totalArtifacts: artifacts.length,
     totalProtocols: protocols.length,
-    totalTimeSaved: protocols.reduce((acc, p) => acc + (p.timesApplied * p.avgTimeSaved), 0),
-    avgSuccessRate: protocols.reduce((acc, p) => acc + p.successRate, 0) / protocols.length,
-    datasetsActive: datasets.filter(d => d.status === 'in-progress').length,
-    datasetsCompleted: datasets.filter(d => d.status === 'completed').length
+    totalTimeSaved: protocols.reduce((acc: number, p: Protocol) => acc + (p.timesApplied * p.avgTimeSaved), 0),
+    avgSuccessRate: protocols.length > 0 ? protocols.reduce((acc: number, p: Protocol) => acc + p.successRate, 0) / protocols.length : 0,
+    datasetsActive: datasets.filter((d: Dataset) => d.status === 'in-progress').length,
+    datasetsCompleted: datasets.filter((d: Dataset) => d.status === 'completed').length
   };
 
-  const AppUI = () => (
+  const AppUI = () => {
+    const navigate = useNavigate();
+
+    const handleStartMining = () => {
+      navigate('/mining');
+      setIsFabMenuOpen(false);
+    };
+
+    return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -293,7 +277,7 @@ const WrongnessPortfolioApp = () => {
         <Routes>
           <Route path="/" element={<DashboardTab stats={stats} miningQueue={miningQueue} protocols={protocols} />} />
           <Route path="/artifacts" element={<ArtifactsTab artifacts={artifacts} />} />
-          <Route path="/artifacts/:id" element={<ArtifactDetailPage artifacts={artifacts} protocols={protocols} />} />
+          <Route path="/artifacts/:id" element={<ArtifactDetailPage artifacts={artifacts} protocols={protocols} onOpenNewProtocolModal={openNewProtocolModal} />} />
           <Route path="/datasets" element={<DatasetsTab sortedDatasets={sortedDatasets} calculateDatasetScore={calculateDatasetScore} calculateDatasetROI={calculateDatasetROI} onOpenAddDatasetModal={() => setIsNewDatasetModalOpen(true)} onAddDataset={handleAddDataset} />} />
           <Route path="/protocols" element={<ProtocolsTab protocols={protocols} />} />
           <Route path="/mining" element={<MiningTab />} />
@@ -308,7 +292,7 @@ const WrongnessPortfolioApp = () => {
             <button onClick={() => { setIsLogProtocolModalOpen(true); setIsFabMenuOpen(false); }} className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
               <span>Log Protocol Use</span>
             </button>
-            <button className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
+            <button onClick={handleStartMining} className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
               <span>Start Mining</span>
             </button>
             <button onClick={() => { openNewArtifactModal(); setIsFabMenuOpen(false); }} className="w-full text-left px-2 py-2 hover:bg-gray-100 rounded text-gray-700 flex items-center space-x-2">
@@ -339,14 +323,23 @@ const WrongnessPortfolioApp = () => {
         onSave={handleLogProtocolUse}
         protocols={protocols}
       />
+
+      <NewProtocolModal
+        isOpen={isNewProtocolModalOpen}
+        onClose={() => setIsNewProtocolModalOpen(false)}
+        onSave={handleAddProtocol}
+        artifactSourceId={currentArtifactSource}
+      />
     </div>
   );
+  };
 
   return (
     <Router>
       <AppUI />
     </Router>
   );
+
 };
 
 export default WrongnessPortfolioApp;

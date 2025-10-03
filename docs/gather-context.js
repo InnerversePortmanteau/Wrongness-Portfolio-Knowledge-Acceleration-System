@@ -7,15 +7,20 @@ const contextFiles = [
   "CONTRIBUTING.md",
   "docs/ARCHITECTURE.md",
   "docs/DECISION_LOG.md",
+  "docs/DATA_INTEGRITY.md",
   "docs/DEVELOPMENT_LOG.md",
   "docs/LIFECYCLE.md",
   "docs/RASCI_MATRIX.md",
   "docs/RISK_MANAGEMENT.md",
   "docs/USER_JOURNEYS.md",
   "ENHANCEMENT_SUMMARY.md",
+  "test-results.log",
 ];
 
-console.log("--- GATHERING PROJECT CONTEXT ---");
+const today = new Date().toISOString().split("T")[0];
+
+console.log(`--- GATHERING PROJECT CONTEXT (Date: ${today}) ---`);
+console.log(`Date: ${today}`);
 
 let fullContext = "";
 

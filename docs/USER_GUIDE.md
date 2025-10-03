@@ -82,3 +82,8 @@ The floating action button (FAB) in the bottom-right corner provides quick acces
 4.  Enter the estimated **Time Saved** in minutes.
 
 Saving this log will automatically update the protocol's statistics, keeping your data accurate and providing a valuable feedback loop on what works.
+
+#### Starting a Mining Session
+
+1.  Click the FAB and select **"Start Mining"**.
+2.  You will be taken directly to the **Mining** tab, where you can begin a focused knowledge extraction session.

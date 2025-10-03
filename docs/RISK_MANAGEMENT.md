@@ -27,6 +27,7 @@ _These are things we know we don't know. They are questions we need to answer._
 - **Metric Accuracy**: Are the current ROI and time-saved calculations truly representative of value, or do they need refinement?
 - **Tooling Stability**: When will "VM Modules" become stable in Node.js, and what changes will be required in our test script when that happens?
 - **Dependency Migration**: What is the scope of work required to migrate to React Router v7 and adopt its new features (e.g., `v7_startTransition`)?
+- **Process Reliability**: How can we continue to automate manual, error-prone steps in our own development process?
 
 ### 3. Unknown Knowns (Untapped Knowledge)
 

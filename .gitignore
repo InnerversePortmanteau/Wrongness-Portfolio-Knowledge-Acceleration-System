@@ -10,6 +10,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+test-results.log
 pnpm-debug.log*
 
 # local env files

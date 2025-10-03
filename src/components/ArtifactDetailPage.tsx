@@ -1,14 +1,15 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Plus } from 'lucide-react';
 import { Artifact, Protocol } from '../types';
 
 interface ArtifactDetailPageProps {
   artifacts: Artifact[];
   protocols: Protocol[];
+  onOpenNewProtocolModal: (artifactId: string) => void;
 }
 
-const ArtifactDetailPage: React.FC<ArtifactDetailPageProps> = ({ artifacts, protocols }) => {
+const ArtifactDetailPage: React.FC<ArtifactDetailPageProps> = ({ artifacts, protocols, onOpenNewProtocolModal }) => {
   const { id } = useParams<{ id: string }>();
   const artifact = artifacts.find(a => a.id === id);
   const relatedProtocols = protocols.filter(p => p.artifactSource === id);
@@ -73,9 +74,34 @@ const ArtifactDetailPage: React.FC<ArtifactDetailPageProps> = ({ artifacts, prot
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Related Protocols ({relatedProtocols.length})</h2>
-        {/* We can render the related protocols here */}
-        <p className="text-gray-500">A list of protocols extracted from this artifact will be displayed here.</p>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Related Protocols ({relatedProtocols.length})</h2>
+          <button onClick={() => onOpenNewProtocolModal(artifact.id)} className="flex items-center space-x-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-sm font-medium">
+            <Plus className="w-4 h-4" />
+            <span>Extract Protocol</span>
+          </button>
+        </div>
+        <div className="divide-y divide-gray-200">
+          {relatedProtocols.length > 0 ? (
+            relatedProtocols.map(protocol => (
+              <div key={protocol.id} className="py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium text-gray-900">{protocol.name}</h3>
+                    <p className="text-sm text-gray-500">{protocol.category}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    protocol.confidence === 'high' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {protocol.confidence} confidence
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 py-4">No protocols have been extracted from this artifact yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );

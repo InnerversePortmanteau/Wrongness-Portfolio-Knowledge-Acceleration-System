@@ -11,6 +11,9 @@ const mockArtifacts: Artifact[] = [
     title: 'I Was Wrong About Debugging',
     domain: 'Software Engineering',
     category: 'Process',
+    wrongModel: 'Model A',
+    signal: 'Signal A',
+    rebuild: 'Rebuild A',
     status: 'evergreen',
     confidence: {},
     dateCreated: '2023-10-01',
@@ -24,6 +27,9 @@ const mockArtifacts: Artifact[] = [
     title: 'A Mistake with Databases',
     domain: 'Data Science',
     category: 'Technical',
+    wrongModel: 'Model B',
+    signal: 'Signal B',
+    rebuild: 'Rebuild B',
     status: 'active',
     confidence: {},
     dateCreated: '2023-11-01',
@@ -62,6 +68,31 @@ describe('ArtifactsTab', () => {
 
     // Both artifacts should be visible again
     expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
+    expect(screen.getByText('A Mistake with Databases')).toBeInTheDocument();
+  });
+
+  it('filters artifacts based on the status filter', () => {
+    renderComponent();
+
+    // Initially, both artifacts are visible
+    expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
+    expect(screen.getByText('A Mistake with Databases')).toBeInTheDocument();
+
+    // Find the dropdown by its role
+    const statusFilter = screen.getByRole('combobox');
+
+    // Filter by 'evergreen'
+    fireEvent.change(statusFilter, { target: { value: 'evergreen' } });
+
+    // Only the evergreen artifact should be visible
+    expect(screen.getByText('I Was Wrong About Debugging')).toBeInTheDocument();
+    expect(screen.queryByText('A Mistake with Databases')).not.toBeInTheDocument();
+
+    // Filter by 'active'
+    fireEvent.change(statusFilter, { target: { value: 'active' } });
+
+    // Only the active artifact should be visible
+    expect(screen.queryByText('I Was Wrong About Debugging')).not.toBeInTheDocument();
     expect(screen.getByText('A Mistake with Databases')).toBeInTheDocument();
   });
 });

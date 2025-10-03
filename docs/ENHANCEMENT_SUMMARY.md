@@ -4,7 +4,14 @@ This document provides a high-level, reverse-chronological summary of all major 
 
 ---
 
-### 2023-10-27
+### 2025-11-01
+
+**Feature: Streamlined Navigation**
+
+- Implemented the "Start Mining" button in the floating action button (FAB) menu.
+- Clicking the button now programmatically navigates the user to the Mining tab, improving workflow efficiency.
+
+### 2025-11-01
 
 **Feature: Artifact Search and Filtering**
 
@@ -16,7 +23,7 @@ This document provides a high-level, reverse-chronological summary of all major 
 
 - The "Quick Add" buttons on the `Datasets` tab are now functional, allowing users to add recommended datasets with a single click.
 
-### 2023-10-26
+### 2025-11-01
 
 **Feature: Data Creation Workflows**
 
@@ -28,14 +35,14 @@ This document provides a high-level, reverse-chronological summary of all major 
 
 - Refactored the FAB into a popover menu to provide a cleaner, more organized UI for quick actions.
 
-### 2023-10-25
+### 2025-11-01
 
 **Feature: Local Persistence**
 
 - Created a `usePersistentState` custom hook to automatically save application state to the browser's `localStorage`.
 - Applied the hook to all core data slices (`artifacts`, `datasets`, `protocols`, `miningQueue`), ensuring user data persists across sessions.
 
-### 2023-10-24
+### 2025-11-01
 
 **Refactor: Component Modularity**
 
